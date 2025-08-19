@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sawago/Core/Utils/Validation.dart';
-import 'package:sawago/Features/Authentication/ForgetPassword/veiw/OTP_Screen.dart';
 import 'package:sawago/Features/Authentication/login/veiw/customTextField.dart';
+import 'package:sawago/Features/Authentication/controller/auth_controller.dart';
 
 class ForgetPasswordView extends StatefulWidget {
   const ForgetPasswordView({super.key});
@@ -82,15 +82,12 @@ class _ForgetPasswordViewState extends State<ForgetPasswordView> {
                   ),
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const OTPView()),
-                      );
+                      AuthController()
+                          .resetPassword(_emailController.text.trim(), context);
                     }
                   },
                   child: const Text(
-                    'إرسال الرمز',
+                    'إرسال رابط تغيير كلمة المرور',
                     style: TextStyle(fontSize: 16, color: Colors.white),
                   ),
                 ),

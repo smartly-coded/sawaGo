@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:sawago/Core/Utils/Validation.dart';
+import 'package:sawago/Features/Authentication/controller/auth_controller.dart';
 import 'package:sawago/Features/Authentication/login/veiw/buttons_google_facebook.dart';
 import 'package:sawago/Features/Authentication/login/veiw/customTextField.dart';
+import 'package:sawago/Features/Authentication/model/User_Model.dart'
+    as AppUser;
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -126,8 +129,16 @@ class _LoginViewState extends State<LoginView> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        onPressed: () {
-                          Navigator.pushReplacementNamed(context, '/signup');
+                        onPressed: () async {
+                          if (_formKey.currentState!.validate()) {
+                            final user = AppUser.User(
+                              email: _emailController.text,
+                              password: _passwordController.text,
+                            );
+
+                            final _authController = AuthController();
+                            await _authController.login(user, context);
+                          }
                         },
                         child: Text(
                           'تسجيل الدخول',
@@ -147,22 +158,25 @@ class _LoginViewState extends State<LoginView> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(
-                            'إنشاء حساب',
-                            style: TextStyle(
-                              fontSize: isSmallScreen ? 14 : 16,
-                              color: const Color(0xFF01301B),
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
                           TextButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.pushReplacementNamed(
+                                  context, '/signup');
+                            },
                             child: Text(
-                              ' ليس لديك حساب؟',
+                              'إنشاء حساب',
                               style: TextStyle(
                                 fontSize: isSmallScreen ? 14 : 16,
-                                color: const Color(0xFF656565),
+                                color: const Color(0xFF01301B),
+                                fontWeight: FontWeight.bold,
                               ),
+                            ),
+                          ),
+                          Text(
+                            ' ليس لديك حساب؟',
+                            style: TextStyle(
+                              fontSize: isSmallScreen ? 14 : 16,
+                              color: const Color(0xFF656565),
                             ),
                           ),
                         ],

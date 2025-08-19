@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:sawago/Core/Utils/Validation.dart';
-import 'package:sawago/Features/Authentication/login/model/User_Model.dart';
+import 'package:sawago/Features/Authentication/controller/auth_controller.dart';
 import 'package:sawago/Features/Authentication/login/veiw/buttons_google_facebook.dart';
 import 'package:sawago/Features/Authentication/login/veiw/customTextField.dart';
+import 'package:sawago/Features/Authentication/model/User_Model.dart' as AppUser;
 
 class SignupView extends StatefulWidget {
   const SignupView({super.key});
@@ -43,7 +44,6 @@ class _SignupViewState extends State<SignupView> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      
       body: LayoutBuilder(
         builder: (context, constraints) {
           return SingleChildScrollView(
@@ -131,11 +131,14 @@ class _SignupViewState extends State<SignupView> {
                         ),
                         onPressed: () async {
                           if (_formKey.currentState!.validate()) {
-                            User user = User(
+                            AppUser.User user = AppUser.User(
                               email: _emailController.text,
                               password: _passwordController.text,
                             );
-                            // await _authController.signup(user, context);
+
+                            final _authController = AuthController();
+
+                            await _authController.signup(user, context);
                           }
                         },
                         child: Text(
