@@ -41,6 +41,22 @@ class AuthController {
     }
   }
 
+
+Future<void> signInWithGoogle(BuildContext context) async {
+    try {
+      final user = await _authRepository.signInWithGoogle();
+      if (user == null) {
+        ToastHelper.showInfo("تم إلغاء تسجيل الدخول بحساب جوجل");
+        return;
+      }
+      ToastHelper.showSuccess("تم تسجيل الدخول بحساب جوجل ");
+      Navigator.pushReplacementNamed(context, '/home');
+    } catch (e) {
+      _showError(e.toString());
+    }
+  }
+
+ 
   void _showError(String message) {
     ToastHelper.showError(message);
   }

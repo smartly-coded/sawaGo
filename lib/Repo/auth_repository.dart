@@ -1,4 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart' as fb;
+import 'package:flutter/foundation.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sawago/Features/Authentication/model/User_Model.dart' as AppUser;
 
 class AuthRepository {
@@ -40,10 +42,42 @@ class AuthRepository {
     }
   }
 
+Future<fb.User?> signInWithGoogle() async {
+    try {
+      if (kIsWeb) {
+        final provider = fb.GoogleAuthProvider();
+        final cred = await _firebaseAuth.signInWithPopup(provider);
+        return cred.user;
+      } else {
+        final gUser = await GoogleSignIn().signIn();
+        if (gUser == null) return null; 
+        final gAuth = await gUser.authentication;
+        final credential = fb.GoogleAuthProvider.credential(
+          accessToken: gAuth.accessToken,
+          idToken: gAuth.idToken,
+        );
+        final userCred =
+            await _firebaseAuth.signInWithCredential(credential);
+        return userCred.user;
+      }
+    } on fb.FirebaseAuthException catch (e) {
+      throw Exception(_handleFirebaseAuthError(e));
+    } catch (e) {
+      throw Exception("حدث خطأ غير متوقع: $e");
+    }
+  }
+
+  
+
+
+
+
   String _handleFirebaseAuthError(fb.FirebaseAuthException e) {
     switch (e.code) {
       case "email-already-in-use":
         return "هذا البريد مستخدم بالفعل";
+         case "account-exists-with-different-credential":
+        return "الإيميل مسجل بطريقة مختلفة. جرّبي تسجيل الدخول بنفس الطريقة السابقة.";
       case "weak-password":
         return "كلمة المرور ضعيفة جداً";
       case "invalid-email":

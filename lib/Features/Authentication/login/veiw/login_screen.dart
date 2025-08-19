@@ -18,7 +18,7 @@ class _LoginViewState extends State<LoginView> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final bool _obscurePassword = true;
-
+  final AuthController _authController = AuthController();
   @override
   void dispose() {
     _emailController.dispose();
@@ -151,7 +151,11 @@ class _LoginViewState extends State<LoginView> {
                       SizedBox(
                           height:
                               isLandscape ? 20 : _responsiveHeight(4, context)),
-                      const SocialLoginButtons(),
+                      SocialLoginButtons(
+                        onGoogleTap: () =>
+                            _authController.signInWithGoogle(context),
+                        onFacebookTap: null,
+                      ),
                       SizedBox(
                           height:
                               isLandscape ? 15 : _responsiveHeight(2, context)),

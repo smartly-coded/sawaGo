@@ -3,7 +3,8 @@ import 'package:sawago/Core/Utils/Validation.dart';
 import 'package:sawago/Features/Authentication/controller/auth_controller.dart';
 import 'package:sawago/Features/Authentication/login/veiw/buttons_google_facebook.dart';
 import 'package:sawago/Features/Authentication/login/veiw/customTextField.dart';
-import 'package:sawago/Features/Authentication/model/User_Model.dart' as AppUser;
+import 'package:sawago/Features/Authentication/model/User_Model.dart'
+    as AppUser;
 
 class SignupView extends StatefulWidget {
   const SignupView({super.key});
@@ -19,7 +20,7 @@ class _SignupViewState extends State<SignupView> {
   final _confirmPasswordController = TextEditingController();
   final bool _obscurePassword = true;
   final bool _obscureConfirmPassword = true;
-
+  final AuthController _authController = AuthController();
   double _responsiveHeight(double percentage, BuildContext context) {
     return MediaQuery.of(context).size.height * (percentage / 100);
   }
@@ -152,7 +153,11 @@ class _SignupViewState extends State<SignupView> {
                       SizedBox(
                           height:
                               isLandscape ? 20 : _responsiveHeight(3, context)),
-                      const SocialLoginButtons(),
+                      SocialLoginButtons(
+                        onGoogleTap: () =>
+                            _authController.signInWithGoogle(context),
+                        onFacebookTap: null,
+                      ),
                       SizedBox(
                           height:
                               isLandscape ? 15 : _responsiveHeight(2, context)),
