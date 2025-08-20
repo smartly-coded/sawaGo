@@ -154,7 +154,8 @@ class _LoginViewState extends State<LoginView> {
                       SocialLoginButtons(
                         onGoogleTap: () =>
                             _authController.signInWithGoogle(context),
-                        onFacebookTap: null,
+                        onFacebookTap: () =>
+                            _authController.signInWithFacebook(context),
                       ),
                       SizedBox(
                           height:

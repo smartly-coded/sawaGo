@@ -50,7 +50,21 @@ Future<void> signInWithGoogle(BuildContext context) async {
         return;
       }
       ToastHelper.showSuccess("تم تسجيل الدخول بحساب جوجل ");
-      Navigator.pushReplacementNamed(context, '/home');
+      Navigator.pushReplacementNamed(context, '/');
+    } catch (e) {
+      _showError(e.toString());
+    }
+  }
+
+Future<void> signInWithFacebook(BuildContext context) async {
+    try {
+      final user = await _authRepository.signInWithFacebook();
+      if (user == null) {
+        ToastHelper.showInfo("تم إلغاء تسجيل الدخول بحساب فيسبوك");
+        return;
+      }
+      ToastHelper.showSuccess("تم تسجيل الدخول بحساب فيسبوك");
+      Navigator.pushReplacementNamed(context, '/');
     } catch (e) {
       _showError(e.toString());
     }

@@ -156,7 +156,8 @@ class _SignupViewState extends State<SignupView> {
                       SocialLoginButtons(
                         onGoogleTap: () =>
                             _authController.signInWithGoogle(context),
-                        onFacebookTap: null,
+                        onFacebookTap: () =>
+                            _authController.signInWithFacebook(context),
                       ),
                       SizedBox(
                           height:
