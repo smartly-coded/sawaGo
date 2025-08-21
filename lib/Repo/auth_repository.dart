@@ -79,23 +79,46 @@ class AuthRepository {
           permissions: ['email', 'public_profile'],
         );
 
-        if (result.status == LoginStatus.success) {
-          print('Access Token: ${result.accessToken}');
-          print('Token type: ${result.accessToken.runtimeType}');
+        switch (result.status) {
+          case LoginStatus.success:
+            if (result.accessToken == null) {
+              throw Exception("فشل في الحصول على رمز الوصول من فيسبوك");
+            }
 
-          final tokenString = result.accessToken!.toString();
-          final credential = fb.FacebookAuthProvider.credential(tokenString);
+           
+            final String tokenValue = result.accessToken!.tokenString;
 
-          final userCred = await _firebaseAuth.signInWithCredential(credential);
-          return userCred.user;
-        } else {
-          return null;
+            print("Facebook Token: $tokenValue"); 
+
+            final credential = fb.FacebookAuthProvider.credential(tokenValue);
+
+            final userCred =
+                await _firebaseAuth.signInWithCredential(credential);
+            return userCred.user;
+
+          case LoginStatus.cancelled:
+            throw Exception("تم إلغاء تسجيل الدخول بفيسبوك");
+
+          case LoginStatus.failed:
+            throw Exception("فشل تسجيل الدخول بفيسبوك: ${result.message}");
+
+          case LoginStatus.operationInProgress:
+            throw Exception(
+                "عملية تسجيل الدخول قيد التنفيذ، يرجى المحاولة مرة أخرى");
+
+          default:
+            throw Exception("حالة غير معروفة في تسجيل الدخول بفيسبوك");
         }
       }
     } on fb.FirebaseAuthException catch (e) {
       throw Exception(_handleFirebaseAuthError(e));
     } catch (e) {
-      throw Exception("حدث خطأ غير متوقع: $e");
+      if (e.toString().contains("EUNSPECIFIED")) {
+        throw Exception("خطأ في إعدادات فيسبوك. تأكد من تكوين التطبيق");
+      } else if (e.toString().contains("network")) {
+        throw Exception("خطأ في الاتصال. تأكد من اتصالك بالإنترنت");
+      }
+      throw Exception("خطأ في تسجيل الدخول بفيسبوك: $e");
     }
   }
 
