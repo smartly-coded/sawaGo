@@ -3,6 +3,7 @@ import 'package:sawago/Features/Authentication/ForgetPassword/veiw/ForgetPass_sc
 import 'package:sawago/Features/Authentication/login/veiw/login_screen.dart';
 import 'package:sawago/Features/Authentication/onBoarding/veiw/onboarding_Screens.dart';
 import 'package:sawago/Features/Authentication/sign%20up/veiw/sign_up_screen.dart';
+import 'package:sawago/Features/dashboard/model/Profile/view/profile_Screen.dart';
 import 'package:sawago/Features/dashboard/model/home/veiw/HomePage.dart';
 
 class AppRoutes {
@@ -11,7 +12,7 @@ class AppRoutes {
   static const String login = '/login';
   static const String signup = '/signup';
   static const String forgetPassword = '/forgetPassword';
-
+static const String profile = '/profile'; 
   static Map<String, WidgetBuilder> getRoutes() {
     return {
       onboarding: (context) => const OnboardingScreen(),
@@ -19,6 +20,7 @@ class AppRoutes {
       signup: (context) => const SignupView(),
       home: (context) => const Homepage(),
       forgetPassword: (context) => const ForgetPasswordView(),
+      profile: (context) => const ProfileScreen(),
     };
   }
 }

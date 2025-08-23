@@ -3,6 +3,7 @@ import 'package:sawago/Core/Helper/ToastHelper.dart';
 import 'package:sawago/Features/Authentication/model/User_Model.dart'
     as AppUser;
 import 'package:sawago/Repo/auth_repository.dart';
+import 'package:sawago/Services/shared_pref.dart';
 
 class AuthController {
   final AuthRepository _authRepository = AuthRepository();
@@ -23,6 +24,8 @@ class AuthController {
     try {
       final loggedInUser = await _authRepository.login(user);
       if (loggedInUser != null) {
+
+        await SharedPrefService.saveUid(loggedInUser.uid);
         ToastHelper.showSuccess("تم تسجيل الدخول ");
         Navigator.pushReplacementNamed(context, '/');
       }
@@ -49,6 +52,7 @@ Future<void> signInWithGoogle(BuildContext context) async {
         ToastHelper.showInfo("تم إلغاء تسجيل الدخول بحساب جوجل");
         return;
       }
+      
       ToastHelper.showSuccess("تم تسجيل الدخول بحساب جوجل ");
       Navigator.pushReplacementNamed(context, '/');
     } catch (e) {

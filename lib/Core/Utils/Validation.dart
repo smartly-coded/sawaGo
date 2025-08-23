@@ -40,4 +40,10 @@ class Validators {
     
     return null;
   }
+
+
+  static bool isValidPhone(String phone) {
+    final regex = RegExp(r'^\+?[0-9]{9,15}$');
+    return regex.hasMatch(phone);
+  }
 }
