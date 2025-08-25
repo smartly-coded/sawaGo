@@ -17,7 +17,7 @@ class AppFooter extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// الشعار
+          
           Image.asset(
             "assets/images/splash_logo.png",
             width: screenWidth < 600 ? 140 : 200,
@@ -27,7 +27,7 @@ class AppFooter extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          /// النصوص
+        
           const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -65,7 +65,7 @@ class AppFooter extends StatelessWidget {
 
           const SizedBox(height: 20),
 
-          /// الأيقونات (ممكن تبقى في صف أو عمود حسب الشاشة)
+         
           screenWidth < 400
               ? Wrap(
                   spacing: 12,
@@ -79,7 +79,7 @@ class AppFooter extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          /// النص الأخير
+          
           const Center(
             child: Text(
               "استمتع بأمتع الرحلات مع تطبيق SawaGO!",
@@ -92,7 +92,7 @@ class AppFooter extends StatelessWidget {
     );
   }
 
-  /// الأيقونات
+ 
   List<Widget> _socialIcons() {
     const iconColor = Color(0xFF02C35E);
     return [

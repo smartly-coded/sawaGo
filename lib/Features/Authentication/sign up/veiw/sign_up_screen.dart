@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sawago/Core/Utils/Validation.dart';
 import 'package:sawago/Features/Authentication/controller/auth_controller.dart';
+import 'package:sawago/Features/Authentication/controller/auth_state.dart';
 import 'package:sawago/Features/Authentication/login/veiw/buttons_google_facebook.dart';
 import 'package:sawago/Features/Authentication/login/veiw/customTextField.dart';
 import 'package:sawago/Features/Authentication/model/User_Model.dart'
@@ -20,14 +22,6 @@ class _SignupViewState extends State<SignupView> {
   final _confirmPasswordController = TextEditingController();
   final bool _obscurePassword = true;
   final bool _obscureConfirmPassword = true;
-  final AuthController _authController = AuthController();
-  double _responsiveHeight(double percentage, BuildContext context) {
-    return MediaQuery.of(context).size.height * (percentage / 100);
-  }
-
-  double _responsiveWidth(double percentage, BuildContext context) {
-    return MediaQuery.of(context).size.width * (percentage / 100);
-  }
 
   @override
   void dispose() {
@@ -35,6 +29,14 @@ class _SignupViewState extends State<SignupView> {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  double _responsiveHeight(double percentage, BuildContext context) {
+    return MediaQuery.of(context).size.height * (percentage / 100);
+  }
+
+  double _responsiveWidth(double percentage, BuildContext context) {
+    return MediaQuery.of(context).size.width * (percentage / 100);
   }
 
   @override
@@ -45,156 +47,187 @@ class _SignupViewState extends State<SignupView> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          return SingleChildScrollView(
-            padding: EdgeInsets.symmetric(
-              horizontal: isSmallScreen ? 20 : _responsiveWidth(10, context),
-              vertical: isLandscape ? 10 : _responsiveHeight(2, context),
-            ),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight: constraints.maxHeight,
-              ),
-              child: IntrinsicHeight(
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      SizedBox(
-                          height:
-                              isLandscape ? 20 : _responsiveHeight(5, context)),
-                      Center(
-                        child: Text(
-                          'إنشاء حساب',
-                          style: TextStyle(
-                            fontSize: isSmallScreen ? 20 : 24,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF01301B),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Center(
-                        child: Text(
-                          "مرحباً، أهلاً بعودتك لقد افتقدناك",
-                          style: TextStyle(
-                            fontSize: isSmallScreen ? 16 : 18,
-                            color: const Color(0xFF656565),
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                          height:
-                              isLandscape ? 15 : _responsiveHeight(3, context)),
-                      CustomTextField(
-                        controller: _emailController,
-                        label: 'البريد الإلكتروني',
-                        keyboardType: TextInputType.emailAddress,
-                        validator: Validators.validateEmail,
-                      ),
-                      SizedBox(
-                          height:
-                              isLandscape ? 15 : _responsiveHeight(2, context)),
-                      CustomTextField(
-                        controller: _passwordController,
-                        label: 'كلمة المرور',
-                        isPassword: _obscurePassword,
-                        validator: Validators.validatePassword,
-                      ),
-                      SizedBox(
-                          height:
-                              isLandscape ? 15 : _responsiveHeight(2, context)),
-                      CustomTextField(
-                        controller: _confirmPasswordController,
-                        label: 'تأكيد كلمة المرور',
-                        isPassword: _obscureConfirmPassword,
-                        validator: (value) {
-                          if (value != _passwordController.text) {
-                            return 'كلمة المرور غير متطابقة';
-                          }
-                          return Validators.validatePassword(value);
-                        },
-                      ),
-                      SizedBox(
-                          height:
-                              isLandscape ? 20 : _responsiveHeight(3, context)),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF01301B),
-                          padding: EdgeInsets.symmetric(
-                            vertical: isSmallScreen ? 15 : 18,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        onPressed: () async {
-                          if (_formKey.currentState!.validate()) {
-                            AppUser.User user = AppUser.User(
-                              email: _emailController.text,
-                              password: _passwordController.text,
-                            );
-
-                            final _authController = AuthController();
-
-                            await _authController.signup(user, context);
-                          }
-                        },
-                        child: Text(
-                          'إنشاء حساب',
-                          style: TextStyle(
-                            fontSize: isSmallScreen ? 16 : 18,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                          height:
-                              isLandscape ? 20 : _responsiveHeight(3, context)),
-                      SocialLoginButtons(
-                        onGoogleTap: () =>
-                            _authController.signInWithGoogle(context),
-                        onFacebookTap: () =>
-                            _authController.signInWithFacebook(context),
-                      ),
-                      SizedBox(
-                          height:
-                              isLandscape ? 15 : _responsiveHeight(2, context)),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+      body: BlocConsumer<AuthCubit, AuthState>(
+        listener: (context, state) {
+          if (state is AuthLoading) {
+            // ممكن تحطى لودر هنا
+          } else if (state is AuthSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("تم إنشاء الحساب بنجاح")),
+            );
+            Navigator.pushReplacementNamed(context, '/login');
+          } else if (state is AuthFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.error)),
+            );
+          }
+        },
+        builder: (context, state) {
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                padding: EdgeInsets.symmetric(
+                  horizontal:
+                      isSmallScreen ? 20 : _responsiveWidth(10, context),
+                  vertical: isLandscape ? 10 : _responsiveHeight(2, context),
+                ),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: constraints.maxHeight,
+                  ),
+                  child: IntrinsicHeight(
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.pushReplacementNamed(context, '/login');
-                            },
+                          SizedBox(
+                              height: isLandscape
+                                  ? 20
+                                  : _responsiveHeight(5, context)),
+                          Center(
                             child: Text(
-                              'تسجيل الدخول',
+                              'إنشاء حساب',
                               style: TextStyle(
-                                fontSize: isSmallScreen ? 14 : 16,
-                                color: const Color(0xFF01301B),
+                                fontSize: isSmallScreen ? 20 : 24,
                                 fontWeight: FontWeight.bold,
+                                color: const Color(0xFF01301B),
                               ),
                             ),
                           ),
-                          Text(
-                            'لديك حساب؟',
-                            style: TextStyle(
-                              fontSize: isSmallScreen ? 14 : 16,
-                              color: const Color(0xFF656565),
+                          const SizedBox(height: 8),
+                          Center(
+                            child: Text(
+                              "مرحباً، أهلاً بعودتك لقد افتقدناك",
+                              style: TextStyle(
+                                fontSize: isSmallScreen ? 16 : 18,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFF656565),
+                              ),
                             ),
                           ),
+                          SizedBox(
+                              height: isLandscape
+                                  ? 15
+                                  : _responsiveHeight(3, context)),
+                          CustomTextField(
+                            controller: _emailController,
+                            label: 'البريد الإلكتروني',
+                            keyboardType: TextInputType.emailAddress,
+                            validator: Validators.validateEmail,
+                          ),
+                          SizedBox(
+                              height: isLandscape
+                                  ? 15
+                                  : _responsiveHeight(2, context)),
+                          CustomTextField(
+                            controller: _passwordController,
+                            label: 'كلمة المرور',
+                            isPassword: _obscurePassword,
+                            validator: Validators.validatePassword,
+                          ),
+                          SizedBox(
+                              height: isLandscape
+                                  ? 15
+                                  : _responsiveHeight(2, context)),
+                          CustomTextField(
+                            controller: _confirmPasswordController,
+                            label: 'تأكيد كلمة المرور',
+                            isPassword: _obscureConfirmPassword,
+                            validator: (value) {
+                              if (value != _passwordController.text) {
+                                return 'كلمة المرور غير متطابقة';
+                              }
+                              return Validators.validatePassword(value);
+                            },
+                          ),
+                          SizedBox(
+                              height: isLandscape
+                                  ? 20
+                                  : _responsiveHeight(3, context)),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF01301B),
+                              padding: EdgeInsets.symmetric(
+                                vertical: isSmallScreen ? 15 : 18,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            onPressed: () {
+                              if (_formKey.currentState!.validate()) {
+                                final user = AppUser.UserModel(
+                                  email: _emailController.text,
+                                  password: _passwordController.text,
+                                );
+
+                                context.read<AuthCubit>().signup(user);
+                              }
+                            },
+                            child: state is AuthLoading
+                                ? const CircularProgressIndicator(
+                                    color: Colors.white,
+                                  )
+                                : Text(
+                                    'إنشاء حساب',
+                                    style: TextStyle(
+                                      fontSize: isSmallScreen ? 16 : 18,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                          ),
+                          SizedBox(
+                              height: isLandscape
+                                  ? 20
+                                  : _responsiveHeight(3, context)),
+                          SocialLoginButtons(
+                            onGoogleTap: () =>
+                                context.read<AuthCubit>().signInWithGoogle(),
+                            onFacebookTap: () =>
+                                context.read<AuthCubit>().signInWithFacebook(),
+                          ),
+                          SizedBox(
+                              height: isLandscape
+                                  ? 15
+                                  : _responsiveHeight(2, context)),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pushReplacementNamed(
+                                      context, '/login');
+                                },
+                                child: Text(
+                                  'تسجيل الدخول',
+                                  style: TextStyle(
+                                    fontSize: isSmallScreen ? 14 : 16,
+                                    color: const Color(0xFF01301B),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                'لديك حساب؟',
+                                style: TextStyle(
+                                  fontSize: isSmallScreen ? 14 : 16,
+                                  color: const Color(0xFF656565),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                              height: isLandscape
+                                  ? 10
+                                  : _responsiveHeight(2, context)),
                         ],
                       ),
-                      SizedBox(
-                          height:
-                              isLandscape ? 10 : _responsiveHeight(2, context)),
-                    ],
+                    ),
                   ),
                 ),
-              ),
-            ),
+              );
+            },
           );
         },
       ),

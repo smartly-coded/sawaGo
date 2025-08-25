@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
@@ -7,14 +8,27 @@ import 'package:sawago/Features/Authentication/model/User_Model.dart'
 
 class AuthRepository {
   final fb.FirebaseAuth _firebaseAuth = fb.FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  Future<fb.User?> signup(AppUser.User user) async {
+  Future<fb.User?> signup(AppUser.UserModel user) async {
     try {
       final credential = await _firebaseAuth.createUserWithEmailAndPassword(
         email: user.email,
         password: user.password,
       );
-      return credential.user;
+      final fb.User? fbUser = credential.user;
+
+      if (fbUser != null) {
+        await _createUserDoc(fbUser, extraData: {
+          "name": "${user.firstName} ${user.lastName}",
+          "phone": user.phone,
+          "bio": user.bio,
+          "dateOfBirth": user.dateOfBirth,
+
+        });
+      }
+
+      return fbUser;
     } on fb.FirebaseAuthException catch (e) {
       throw Exception(_handleFirebaseAuthError(e));
     } catch (e) {
@@ -22,7 +36,7 @@ class AuthRepository {
     }
   }
 
-  Future<fb.User?> login(AppUser.User user) async {
+  Future<fb.User?> login(AppUser.UserModel user) async {
     try {
       final credential = await _firebaseAuth.signInWithEmailAndPassword(
         email: user.email,
@@ -49,7 +63,12 @@ class AuthRepository {
       if (kIsWeb) {
         final provider = fb.GoogleAuthProvider();
         final cred = await _firebaseAuth.signInWithPopup(provider);
-        return cred.user;
+        final fb.User? user = cred.user;
+
+        if (user != null) {
+          await _createUserDoc(user);
+        }
+        return user;
       } else {
         final gUser = await GoogleSignIn().signIn();
         if (gUser == null) return null;
@@ -59,7 +78,12 @@ class AuthRepository {
           idToken: gAuth.idToken,
         );
         final userCred = await _firebaseAuth.signInWithCredential(credential);
-        return userCred.user;
+        final fb.User? user = userCred.user;
+
+        if (user != null) {
+          await _createUserDoc(user);
+        }
+        return user;
       }
     } on fb.FirebaseAuthException catch (e) {
       throw Exception(_handleFirebaseAuthError(e));
@@ -73,7 +97,12 @@ class AuthRepository {
       if (kIsWeb) {
         final provider = fb.FacebookAuthProvider();
         final cred = await _firebaseAuth.signInWithPopup(provider);
-        return cred.user;
+        final fb.User? user = cred.user;
+
+        if (user != null) {
+          await _createUserDoc(user);
+        }
+        return user;
       } else {
         final LoginResult result = await FacebookAuth.instance.login(
           permissions: ['email', 'public_profile'],
@@ -85,27 +114,23 @@ class AuthRepository {
               throw Exception("فشل في الحصول على رمز الوصول من فيسبوك");
             }
 
-           
             final String tokenValue = result.accessToken!.tokenString;
-
-            print("Facebook Token: $tokenValue"); 
-
             final credential = fb.FacebookAuthProvider.credential(tokenValue);
-
             final userCred =
                 await _firebaseAuth.signInWithCredential(credential);
-            return userCred.user;
+            final fb.User? user = userCred.user;
+
+            if (user != null) {
+              await _createUserDoc(user);
+            }
+            return user;
 
           case LoginStatus.cancelled:
             throw Exception("تم إلغاء تسجيل الدخول بفيسبوك");
-
           case LoginStatus.failed:
             throw Exception("فشل تسجيل الدخول بفيسبوك: ${result.message}");
-
           case LoginStatus.operationInProgress:
-            throw Exception(
-                "عملية تسجيل الدخول قيد التنفيذ، يرجى المحاولة مرة أخرى");
-
+            throw Exception("عملية تسجيل الدخول قيد التنفيذ");
           default:
             throw Exception("حالة غير معروفة في تسجيل الدخول بفيسبوك");
         }
@@ -121,6 +146,32 @@ class AuthRepository {
       throw Exception("خطأ في تسجيل الدخول بفيسبوك: $e");
     }
   }
+
+
+
+
+ Future<void> _createUserDoc(fb.User user, {Map<String, dynamic>? extraData}) async {
+  final userDoc = _firestore.collection("users").doc(user.uid);
+
+  try {
+    if (!(await userDoc.get()).exists) {
+      await userDoc.set({
+        "uid": user.uid,
+        "email": user.email,
+        "name": user.displayName ?? extraData?["name"] ?? "",
+        "phone": user.phoneNumber ?? extraData?["phone"] ?? "",
+        "photoUrl": user.photoURL ?? "",
+        "createdAt": FieldValue.serverTimestamp(),
+      });
+    }
+  } on FirebaseException catch (e) {
+   
+    throw Exception("Firestore Error: ${e.message}");
+  } catch (e) {
+    throw Exception("Unexpected Firestore error: $e");
+  }
+}
+
 
   String _handleFirebaseAuthError(fb.FirebaseAuthException e) {
     switch (e.code) {
