@@ -66,6 +66,17 @@ class AppDrawer extends StatelessWidget {
                     Navigator.pushNamed(context, '/trips');
                   },
                 ),
+                _buildDrawerItem(context,
+                    icon: Icons.flight_takeoff,
+                    title: "تتبع الرحلة ",
+                     onTap: () {
+                  Navigator.pushNamed(context, '/tracking_trip');
+                }),
+                _buildDrawerItem(context,
+                    icon: Icons.flight_takeoff, title: "المحفظة ",
+                     onTap: () {
+                  Navigator.pushNamed(context, '/wallet');
+                }),
                 _buildDrawerItem(
                   context,
                   icon: Icons.language,

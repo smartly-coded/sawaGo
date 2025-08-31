@@ -306,7 +306,7 @@ class Homepage extends StatelessWidget {
                         ])),
                 SizedBox(height: screenHeight * 0.04),
                 SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.45,
+                  height: MediaQuery.of(context).size.height * 0.65,
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Container(
@@ -323,9 +323,9 @@ class Homepage extends StatelessWidget {
                                   child: Image.asset(
                                     "assets/images/unsplash_iqYUO67mRxg.png",
                                     width:
-                                        MediaQuery.of(context).size.width * 0.5,
+                                        MediaQuery.of(context).size.width * 0.6,
                                     height: MediaQuery.of(context).size.height *
-                                        0.18,
+                                        0.2,
                                     fit: BoxFit.cover,
                                   ),
                                 ),
@@ -337,9 +337,9 @@ class Homepage extends StatelessWidget {
                                   child: Image.asset(
                                     "assets/images/unsplash_jvIrjrQKCng.png",
                                     width:
-                                        MediaQuery.of(context).size.width * 0.5,
+                                        MediaQuery.of(context).size.width * 0.7,
                                     height: MediaQuery.of(context).size.height *
-                                        0.20,
+                                        0.28,
                                     fit: BoxFit.cover,
                                   ),
                                 ),
@@ -349,13 +349,22 @@ class Homepage extends StatelessWidget {
                           Positioned(
                             left: 0,
                             top: 0,
-                            bottom: 0,
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(16),
-                              child: Image.asset(
-                                "assets/images/unsplash_1B_EoGyXGs8.png",
-                                width: MediaQuery.of(context).size.width * 0.55,
-                                fit: BoxFit.cover,
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                    top: 10.0, bottom: 50.0),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: Image.asset(
+                                    "assets/images/unsplash_1B_EoGyXGs8.png",
+                                    width: MediaQuery.of(context).size.width *
+                                        0.55,
+                                    height: MediaQuery.of(context).size.height *
+                                        0.45,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
@@ -549,7 +558,7 @@ class Homepage extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(unitSize * 2),
                   child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+                    filter: ImageFilter.blur(sigmaX: 15.0, sigmaY: 15.0),
                     child: Container(
                       width: double.infinity,
                       decoration: BoxDecoration(

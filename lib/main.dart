@@ -3,9 +3,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:device_preview/device_preview.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:sawago/Core/Routing/app_routes.dart';
 import 'package:sawago/Features/Authentication/controller/auth_controller.dart';
+import 'package:sawago/Features/dashboard/model/Trips/controller/trips_cubit.dart';
 import 'package:sawago/Repo/auth_repository.dart';
+import 'package:sawago/Repo/trips_repository.dart';
 import 'package:sawago/firebase_options.dart';
 
 void main() async {
@@ -27,7 +30,11 @@ void main() async {
           BlocProvider<AuthCubit>(
             create: (context) => AuthCubit(AuthRepository()),
           ),
-          // Cubits تانية لو عندك
+          BlocProvider<TripsCubit>(
+            create: (context) => TripsCubit(
+              TripsRepository(FirebaseFirestore.instance),
+            )..fetchTrips(),
+          ),
         ],
         child: DevicePreview(
           enabled: true,

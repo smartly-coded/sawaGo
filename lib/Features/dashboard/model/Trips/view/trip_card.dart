@@ -10,6 +10,19 @@ class DriverTripCard extends StatelessWidget {
     required this.trip,
   });
 
+  String _tripDuration() {
+    final duration = trip.endTime.difference(trip.startTime);
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes % 60;
+    if (hours > 0 && minutes > 0) {
+      return "$hours س $minutesد";
+    } else if (hours > 0) {
+      return "$hours س";
+    } else {
+      return "$minutes د";
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -23,57 +36,80 @@ class DriverTripCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-         
           Row(
-            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
                 trip.from,
                 style:
                     const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
-              const Icon(
-                Icons.arrow_forward,
-                size: 25,
-                color: Colors.black54,
+              const SizedBox(width: 6),
+              Expanded(
+                child: Row(
+                  children: [
+                    const Expanded(
+                      child: Divider(
+                        color: Colors.black54,
+                        endIndent: 1,
+                        thickness: 2,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                      child: Text(
+                        _tripDuration(),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF02C35E),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
+              const SizedBox(width: 6),
+              const Icon(Icons.arrow_forward, size: 25, color: Colors.black54),
+              const SizedBox(width: 6),
               Text(
                 trip.to,
                 style:
                     const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
+              Spacer(),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Text(
-                trip.arrivalTime ?? "-",
+                trip.startTimeFormatted,
                 style: const TextStyle(
-                    color: Color(0xFF02C35E),
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold),
+                  color: Color(0xFF02C35E),
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              const SizedBox(width: 50),
+              const SizedBox(width: 30),
               Text(
-                trip.departureTime ?? "-",
+                trip.endTimeFormatted,
                 style: const TextStyle(
-                    color: Color(0xFF02C35E),
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold),
+                  color: Color(0xFF02C35E),
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              Spacer(),
-              const Text(
-                "سيارة ",
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+              const Spacer(),
+              Text(
+                trip.category,
+                style:
+                    const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
               ),
             ],
           ),
-
           const Divider(height: 20, thickness: 2, color: Color(0xFFE0E0E0)),
-
-          
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -93,9 +129,11 @@ class DriverTripCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 6),
-                  Text(trip.driverName,
-                      style: const TextStyle(
-                          fontSize: 14, fontWeight: FontWeight.w500)),
+                  Text(
+                    trip.driverName,
+                    style: const TextStyle(
+                        fontSize: 14, fontWeight: FontWeight.w500),
+                  ),
                 ],
               ),
               Row(
@@ -120,21 +158,15 @@ class DriverTripCard extends StatelessWidget {
               ),
             ],
           ),
-
           const SizedBox(height: 12),
-
-        
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-
               GestureDetector(
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (_) => BookingPage(trip: trip),
-                    ),
+                    MaterialPageRoute(builder: (_) => BookingPage(trip: trip)),
                   );
                 },
                 child: Container(
@@ -147,19 +179,20 @@ class DriverTripCard extends StatelessWidget {
                   child: const Text(
                     "حجز فوري",
                     style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF02C35E)),
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF02C35E),
+                    ),
                   ),
                 ),
               ),
-
               Text(
-                "${trip.price ?? "-"} ل.س",
+                "${trip.price} ل.س",
                 style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87),
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
               ),
             ],
           )

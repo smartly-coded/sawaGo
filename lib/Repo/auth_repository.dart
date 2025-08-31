@@ -150,12 +150,18 @@ class AuthRepository {
 
 
 
- Future<void> _createUserDoc(fb.User user, {Map<String, dynamic>? extraData}) async {
+Future<void> _createUserDoc(fb.User user, {Map<String, dynamic>? extraData}) async {
   final userDoc = _firestore.collection("users").doc(user.uid);
+//  final walletDoc = _firestore.collection("wallets").doc(user.uid);
 
   try {
-    if (!(await userDoc.get()).exists) {
-      await userDoc.set({
+    // استخدام Batch writes للعمليات المنفصلة
+    WriteBatch batch = _firestore.batch();
+    
+    // التحقق من وجود المستخدم أولاً
+    final userSnapshot = await userDoc.get();
+    if (!userSnapshot.exists) {
+      batch.set(userDoc, {
         "uid": user.uid,
         "email": user.email,
         "name": user.displayName ?? extraData?["name"] ?? "",
@@ -164,14 +170,45 @@ class AuthRepository {
         "createdAt": FieldValue.serverTimestamp(),
       });
     }
-  } on FirebaseException catch (e) {
-   
-    throw Exception("Firestore Error: ${e.message}");
-  } catch (e) {
-    throw Exception("Unexpected Firestore error: $e");
-  }
-}
 
+    // // التحقق من وجود المحفظة أولاً
+    // final walletSnapshot = await walletDoc.get();
+    // if (!walletSnapshot.exists) {
+    //   // إنشاء المحفظة (مسموح create)
+    //   batch.set(walletDoc, {
+    //     "balance": 0.0,
+    //     "createdAt": FieldValue.serverTimestamp(),
+    //   });
+      
+    //   // إضافة معاملة افتتاحية (مسموح create في subcollection)
+    //   final initialTxnRef = walletDoc.collection("transactions").doc();
+    //   batch.set(initialTxnRef, {
+    //     'type': 'credit',
+    //     'amount': 0.0,
+    //     'description': 'فتح المحفظة',
+    //     'timestamp': FieldValue.serverTimestamp(),
+    //   });
+    // }
+
+    // // تنفيذ العمليات إذا كان هناك شيء للإضافة
+    // if (!userSnapshot.exists || !walletSnapshot.exists) {
+    //   await batch.commit();
+    // }
+
+  } on FirebaseException catch (e) {
+    print("Firestore Error: ${e.message}");
+  } catch (e) {
+    print("Unexpected error: $e");
+  }
+}  Future<void> logout() async {
+    try {
+      await _firebaseAuth.signOut();
+      await GoogleSignIn().signOut();
+      await FacebookAuth.instance.logOut();
+    } catch (e) {
+      throw Exception("حدث خطأ أثناء تسجيل الخروج: $e");
+    }
+  }
 
   String _handleFirebaseAuthError(fb.FirebaseAuthException e) {
     switch (e.code) {
