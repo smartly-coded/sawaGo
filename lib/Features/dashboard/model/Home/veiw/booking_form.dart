@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:sawago/Core/Theme/app_colors.dart';
 import 'package:sawago/Features/dashboard/model/Home/controller/location_autocomplete.dart';
+import 'package:sawago/Features/dashboard/model/Trips/controller/trips_cubit.dart';
+import 'package:sawago/Features/dashboard/model/Trips/view/TripsPage.dart';
 
 class BookingForm extends StatefulWidget {
   const BookingForm({super.key});
@@ -47,9 +51,10 @@ class _BookingFormState extends State<BookingForm> {
                 lastDate: DateTime(2100),
                 initialDate: DateTime.now(),
               );
+              
               if (pickedDate != null) {
                 dateController.text =
-                    "${pickedDate.day}-${pickedDate.month}-${pickedDate.year}";
+                    DateFormat('yyyy-MM-dd').format(pickedDate);
               }
             },
             validator: (value) =>
@@ -76,11 +81,22 @@ class _BookingFormState extends State<BookingForm> {
           SubmitButton(
             onPressed: () {
               if (_formKey.currentState!.validate()) {
-               
-                print("من: ${fromController.text}");
-                print("إلى: ${toController.text}");
-                print("التاريخ: ${dateController.text}");
-                print("عدد الركاب: ${passengersController.text}");
+                final from = fromController.text.trim();
+                final to = toController.text.trim();
+                final date = dateController.text.trim();
+                final passengers = int.parse(passengersController.text.trim());
+
+                context.read<TripsCubit>().searchTrips(
+                      from: from,
+                      to: to,
+                      date: date,
+                      passengers: passengers,
+                    );
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const TripsPage()),
+                );
               }
             },
           ),

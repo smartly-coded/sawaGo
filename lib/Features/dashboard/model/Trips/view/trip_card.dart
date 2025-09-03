@@ -79,6 +79,7 @@ class DriverTripCard extends StatelessWidget {
               ),
               Spacer(),
             ],
+            
           ),
           const SizedBox(height: 8),
           Row(

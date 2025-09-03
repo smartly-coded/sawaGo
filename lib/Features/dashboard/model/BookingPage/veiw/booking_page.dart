@@ -147,8 +147,12 @@ class _BookingPageState extends State<BookingPage> {
                                   child: RadioListTile<String>(
                                     title: const Text("عادية"),
                                     value: "عادية",
-                                    groupValue: widget
-                                        .trip.carType, 
+                                    groupValue: widget.trip.car?.carType ?? widget.trip.carType, 
+
+
+                                     
+
+
                                     activeColor: const Color(0xFF02C35E),
                                     onChanged: null, 
                                   ),
@@ -157,8 +161,7 @@ class _BookingPageState extends State<BookingPage> {
                                   child: RadioListTile<String>(
                                     title: const Text("كلاسيك"),
                                     value: "كلاسيك",
-                                    groupValue: widget
-                                        .trip.carType,
+                                    groupValue:  widget.trip.car?.carType ?? widget.trip.carType,
                                     activeColor: const Color(0xFF02C35E),
                                     onChanged: null,
                                   ),
@@ -184,7 +187,7 @@ class _BookingPageState extends State<BookingPage> {
                             ),
                             const Spacer(),
                             Text(
-                              "${widget.trip.seats}",
+                              "${widget.trip.car?.seats ?? widget.trip.seats}",
                               style: TextStyle(
                                 fontSize: isTablet ? 18 : 14,
                                 fontWeight: FontWeight.w500,

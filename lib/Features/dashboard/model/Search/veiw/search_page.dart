@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sawago/Features/dashboard/model/BookingPage/veiw/booking_page.dart';
+import 'package:sawago/Features/dashboard/model/Trips/controller/trips_cubit.dart';
+import 'package:sawago/Features/dashboard/model/Trips/model/trip_model.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -10,19 +14,26 @@ class SearchPage extends StatefulWidget {
 class _SearchPageState extends State<SearchPage> {
   final TextEditingController searchController = TextEditingController();
 
-  List<String> cities = ["حمص", "دمشق", "حلب", "اللاذقية", "طرطوس"];
-  List<String> filteredCities = [];
+  List<TripModel> filteredTrips = [];
 
   @override
   void initState() {
     super.initState();
-    filteredCities = cities;
+    final cubit = context.read<TripsCubit>();
+    filteredTrips = cubit.allTrips; // في البداية كل الرحلات
   }
 
   void _filterSearch(String query) {
+    final cubit = context.read<TripsCubit>();
     setState(() {
-      filteredCities =
-          cities.where((city) => city.contains(query.trim())).toList();
+      if (query.trim().isEmpty) {
+        filteredTrips = cubit.allTrips;
+      } else {
+        filteredTrips = cubit.allTrips.where((trip) {
+          return trip.from.contains(query.trim()) ||
+              trip.to.contains(query.trim());
+        }).toList();
+      }
     });
   }
 
@@ -58,35 +69,51 @@ class _SearchPageState extends State<SearchPage> {
                   onChanged: _filterSearch,
                   decoration: const InputDecoration(
                     border: InputBorder.none,
-                    hintText: "ابحث  ",
+                    hintText: "ابحث باسم المدينة أو الوجهة",
                     suffixIcon: Icon(Icons.search, color: Color(0xFF555555)),
                   ),
                 ),
               ),
             ),
             Expanded(
-              child: ListView.separated(
-                itemCount: filteredCities.length,
-                separatorBuilder: (_, __) => const Divider(),
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(
-                      filteredCities[index],
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
+              child: filteredTrips.isEmpty
+                  ? const Center(
+                      child: Text(
+                        "لا توجد رحلات متاحة",
+                        style: TextStyle(
+                            fontSize: 18, color: Color(0xFF555555)),
                       ),
+                    )
+                  : ListView.separated(
+                      itemCount: filteredTrips.length,
+                      separatorBuilder: (_, __) => const Divider(),
+                      itemBuilder: (context, index) {
+                        final trip = filteredTrips[index];
+                        return ListTile(
+                          title: Text(
+                            trip.from,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                          subtitle: Text(
+                            "إلى ${trip.to}",
+                            style: const TextStyle(color: Colors.grey),
+                          ),
+                          leading: const Icon(Icons.chevron_left,
+                              color: Color(0xFF02C35E)),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => BookingPage(trip: trip),
+                              ),
+                            );
+                          },
+                        );
+                      },
                     ),
-                    subtitle: const Text("سوريا",
-                        style: TextStyle(color: Colors.grey)),
-                    leading: const Icon(Icons.chevron_left,
-                        color: Color(0xFF02C35E)),
-                    onTap: () {
-                      Navigator.pop(context, filteredCities[index]);
-                    },
-                  );
-                },
-              ),
             ),
           ],
         ),
